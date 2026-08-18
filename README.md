@@ -1,4 +1,4 @@
-# dsh-motion-complete
+# dsh-motion-complete Deepseekharness动画补全计划
 
 DeepSeek Harness（DSH）**dsh-motion-complete DSH动画补全计划**：为 DSH 的web UI的每个交互增加动效，即装即用、卸载即还原
 
