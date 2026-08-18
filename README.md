@@ -1,21 +1,21 @@
 # dsh-motion-complete
 
-**DeepSeek Harness（DSH）完整动效主题包** —— 把 DSH 已定稿的 UI 动效改动固化为「即装即用、卸载即还原、版本可校验」的补丁包。
-
-> 适用 DSH 版本：`0.1.0-rc.6`、`0.1.0-rc.7`（版本不匹配时安装/卸载会明确报错并中止，绝不静默失效、绝不写坏文件）
+DeepSeek Harness（DSH）**dsh-motion-complete DSH动画补全计划**：为 DSH 的web UI的每个交互增加动效，即装即用、卸载即还原
 
 ---
 
-## 这是什么
+## 这是什么(?)
 
-DeepSeek Harness（[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)）的 Web 界面有一批 UI 动效改动（消息入场、菜单/面板出入场、设置面板开合、模型菜单翻页与推理等级滑块、侧边栏悬浮与拖拽、工作区行动画与 View Transition、标签滑动指示条、chevron 旋转等，共 **17 个文件**）。这些改动此前只存在于个别安装中，重装 DSH 即丢失。
+此项目为DeepSeek Harness（[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)）的 Web 界面做了一批 UI 动效（消息入场、菜单/面板出入场、设置面板开合、模型菜单翻页与推理等级滑块、侧边栏悬浮与拖拽、工作区行动画与 View Transition、标签滑动指示条、chevron 旋转等）。这些改动此前只存在于个别安装中，重装 DSH 即丢失。
 
-本主题包把它们**原样**固化为可安装、可卸载、可校验的补丁：
+（作者因为发现DSH的web界面几乎每个按钮都没有交互动画，让人非常不爽，于是用DSH做了这个项目）（确信）
+
+本项目把它们打包为可安装、可卸载、可校验的补丁：
 
 | 能力 | 说明 |
 |------|------|
-| 即装即用 | `node bin/apply.mjs` 一次性应用全部 17 处改动，刷新页面全部生效 |
-| 卸载即还原 | `node bin/apply.mjs --revert` 逐字节还原到官方原版 |
+| 即装即用 | `node bin/apply.mjs` 一次性应用全部改动，刷新页面全部生效 |
+| 卸载还原 | `node bin/apply.mjs --revert` 还原到官方原版 |
 | 版本可校验 | 三重校验（DSH 版本、目标包版本、文件 hash）+ 锚点恰好一次计数 + 应用后复核 + 两阶段提交（全部校验通过才写盘，失败零写入） |
 | 多版本 | 同一主题包同时支持 `0.1.0-rc.6` 与 `0.1.0-rc.7`，安装时按当前 DSH 版本自动选用对应补丁集 |
 | 幂等 | 重复安装自动跳过已安装文件；重复卸载自动跳过未安装文件 |
@@ -34,8 +34,7 @@ DeepSeek Harness（[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai
 
 ```sh
 # 1. 把本仓库克隆/拷贝到任意目录（无需放进 node_modules）
-git clone https://github.com/<你的账号>/dsh-motion-complete.git
-cd dsh-motion-complete
+cd 你的dsh-motion-complete的安装路径
 
 # 2. 执行安装（自动探测 DSH 安装位置；也可用 --target 显式指定）
 node bin/apply.mjs
@@ -43,7 +42,7 @@ node bin/apply.mjs
 # 显式指定安装根（Windows 全局安装典型路径）：
 node bin/apply.mjs --target "C:\Users\<用户>\AppData\Roaming\npm\node_modules\@deepseek-ai\dsh"
 
-# 3. 刷新 Web 页面（强刷 Ctrl+Shift+R 更稳妥）——全部动效即生效
+# 3. 刷新 Web 页面（强刷 Ctrl+Shift+R 并重启 DSH 更稳妥）——全部动效即生效
 ```
 
 预期输出（节选）：
@@ -71,19 +70,9 @@ DSH 安装: C:\...\node_modules\@deepseek-ai\dsh（版本 0.1.0-rc.7 ✓，支�
 node bin/apply.mjs --revert
 ```
 
-卸载后所有被改文件**逐字节还原为官方原版**（还原后 hash 复核，不一致会报错中止）。刷新页面（强刷）即完全还原。
+卸载后所有被改文件**还原为官方原版**（还原后 hash 复核，不一致会报错中止）。刷新页面（强刷）即完全还原。
 
 > 注意：卸载前请勿手动修改任何 `lib/client.js` / dist 文件，否则会被「文件状态未知」保护拦下（见故障排查）。
-
-## 版本兼容矩阵
-
-| 主题包版本 | 支持 DSH 版本 | 说明 |
-|-----------|--------------|------|
-| 1.1.0 | `0.1.0-rc.6`、`0.1.0-rc.7` | 多版本补丁集（manifest v2），两版本各 17 处动效 |
-| 1.0.0 | `0.1.0-rc.6` | 单版本锁定 |
-| 其他版本 | — | 安装/卸载直接报错中止（列出支持版本），不静默失效、不写坏文件 |
-
-**版本校验行为**：执行任何操作前读取 DSH 根 `package.json` 的 `version`，在 `patches/manifest.json` 的 `versions[]` 中精确匹配（同时校验每个目标包 `package.json` 的 `version`）；不匹配即明确报错并退出码 1，**不写任何文件**。
 
 ## 工作原理与安全设计
 
@@ -108,12 +97,7 @@ node bin/apply.mjs --revert
 | 卸载后仍有动效 | 页面缓存 | 强刷页面；如仍存在，执行 `--check` 查看是否有文件处于未知状态 |
 | 系统开启"减少动态效果" | 属正常设计 | 所有已定稿动效在 `prefers-reduced-motion: reduce` 下按原样禁用/归零 |
 
-## 适配新 DSH 版本（维护者）
-
-1. 用新版本 DSH 的干净安装与已定稿动效版分别提取锚点（生成工具见本仓库归档/历史版本，或自行按 `patches/manifest.json` 的结构生成）；
-2. 在 `patches/manifest.json` 的 `versions[]` 中追加新条目（`dshVersion`、17 个目标的 `packageVersion`、`sha256.original/patched`、`edits` 锚点对），并把 `package.json` 版本按语义化版本递增、`CHANGELOG.md` 记录变更；
-3. 发布前在模拟安装上验证：`apply` 后与动效版逐字节一致、`--revert` 后与官方原版逐字节一致、版本不匹配/锚点破坏均报错且零写入；
-4. 动效参数（时长/缓动/时序）一律以目标 DSH 版本产物为准，只搬运不重写。
+**如遇到其它问题，欢迎通过作者本人邮箱&QQ反馈^_^：3536989081@qq.com**
 
 ## 项目结构
 
@@ -128,7 +112,3 @@ dsh-motion-complete/
 ├── CHANGELOG.md                 # 版本历史
 └── .gitignore
 ```
-
-## 许可证
-
-MIT
